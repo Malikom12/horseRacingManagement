@@ -11,8 +11,12 @@ public class Horse
         get { return name; }
         set
         {
+            
             if (string.IsNullOrWhiteSpace(value))
-                throw new ArgumentException("Name cannot be empty or whitespace.");
+            {
+                throw new ArgumentException("Name cannot be empty or whitespace."); 
+            }
+
             name = value;
         }
     }
@@ -23,7 +27,10 @@ public class Horse
         set
         {
             if (value > DateTime.Now)
+            {
                 throw new ArgumentException("Date of birth cannot be in the future.");
+            }
+                
             dateOfBirth = value;
         }
     }
@@ -34,7 +41,10 @@ public class Horse
         set
         {
             if (string.IsNullOrWhiteSpace(value))
+            {
                 throw new ArgumentException("HorseID cannot be empty or whitespace.");
+            }
+                
             horseID = value;
         }
     }
