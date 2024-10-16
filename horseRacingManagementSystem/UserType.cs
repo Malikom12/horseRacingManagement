@@ -1,6 +1,6 @@
 ﻿namespace horseRacingManagementSystem;
 
-public class Program
+public class UserType
 {
     
 }
