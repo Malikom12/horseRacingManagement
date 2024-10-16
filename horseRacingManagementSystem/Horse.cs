@@ -2,19 +2,36 @@
 
 public class Horse : RacingEntity
 {
-    public DateTime DateOfBirth { get; set; }
-    public string HorseID { get; set; }
-    
-    public Horse(string name, DateTime dateOfBirth, string horseID)
+    private DateTime _dateOfBirth;
+    private static int _currentId = 0;
+
+    public DateTime DateOfBirth
+    {
+        get { return _dateOfBirth; }
+        set
+        {
+            if (value > DateTime.Now)
+                throw new ArgumentException("Date of birth cannot be in the future.");
+            _dateOfBirth = value;
+        }
+    }
+
+    public int HorseID { get; }
+
+    public Horse(string name, DateTime dateOfBirth)
     {
         Name = name;
         DateOfBirth = dateOfBirth;
-        HorseID = horseID;
+        HorseID = _currentId;
+        _currentId++;
     }
     
     public int GetAge()
     {
-        return DateTime.Now.Year - DateOfBirth.Year;
+        var today = DateTime.Today;
+        var age = today.Year - DateOfBirth.Year;
+        if (DateOfBirth.Date > today.AddYears(-age)) age--;
+        return age;
     }
     
     public override string GetDetails()
