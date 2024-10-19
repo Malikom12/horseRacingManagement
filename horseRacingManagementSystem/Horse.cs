@@ -1,4 +1,4 @@
-﻿namespace horseRacingManagementSystem;
+﻿namespace HorseRacingManagementSystem;
 
 public class Horse : RacingEntity
 {

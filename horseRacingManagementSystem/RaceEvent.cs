@@ -1,4 +1,4 @@
-﻿namespace horseRacingManagementSystem;
+﻿namespace HorseRacingManagementSystem;
 
 public class RaceEvent : RacingEntity
 {
@@ -23,6 +23,8 @@ public class RaceEvent : RacingEntity
 
     public void AddRace(Race race)
     {
+        if (race.StartTime < EventDate)
+            throw new ArgumentException("Race start time cannot be before the event date");
         Races.Add(race);
     }
 
