@@ -5,11 +5,11 @@ public class Race : RacingEntity
     private static int _raceCounter = 1;
 
     public DateTime StartTime { get; set; }
-    public List<Horse> Participants { get; set; }
+    public List<Horse> Participants { get; private set; }
 
     public Race()
     {
-        Name = "Race " + _raceCounter;
+        Name = "Race " + _raceCounter.ToString();
         _raceCounter++;
         StartTime = DateTime.MinValue;
         Participants = new List<Horse>();
@@ -17,7 +17,15 @@ public class Race : RacingEntity
 
     public Race(string name, DateTime startTime)
     {
-        Name = name;
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            Name = "Race " + _raceCounter.ToString();
+            _raceCounter++;
+        }
+        else
+        {
+            Name = name;
+        }
         StartTime = startTime;
         Participants = new List<Horse>();
     }
@@ -36,14 +44,22 @@ public class Race : RacingEntity
 
     public override string GetDetails()
     {
-        string timeInfo = StartTime != DateTime.MinValue ? $", Start Time: {StartTime}" : ", Start Time: Not set";
-        return $"Race: {Name}{timeInfo}, Participants: {Participants.Count}";
+        string timeInfo;
+        if (StartTime != DateTime.MinValue)
+        {
+            timeInfo = ", Start Time: " + StartTime.ToString();
+        }
+        else
+        {
+            timeInfo = ", Start Time: Not set";
+        }
+        return "Race: " + Name + timeInfo + ", Participants: " + Participants.Count.ToString();
     }
 
     public string GetParticipantDetails()
     {
-        string details = $"Participants in {Name}:\n";
-        foreach (var horse in Participants)
+        string details = "Participants in " + Name + ":\n";
+        foreach (Horse horse in Participants)
         {
             details += horse.GetDetails() + "\n";
         }
