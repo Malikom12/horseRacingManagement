@@ -16,7 +16,7 @@ public class Horse : RacingEntity
         }
     }
 
-    public int HorseID { get; }
+    public int HorseID { get; private set; }
 
     public Horse(string name, DateTime dateOfBirth)
     {
@@ -25,6 +25,18 @@ public class Horse : RacingEntity
         HorseID = _currentId;
         _currentId++;
     }
+
+    public Horse(string name, DateTime dateOfBirth, int id)
+    {
+        Name = name;
+        DateOfBirth = dateOfBirth;
+        HorseID = id;
+        if (id >= _currentId)
+        {
+            _currentId = id + 1;
+        }
+    }
+
     
     public int GetAge()
     {

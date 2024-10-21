@@ -5,9 +5,11 @@ public class Program
         static List<RaceEvent> _events = new List<RaceEvent>();
         static List<Horse> _horses = new List<Horse>();
         static UserType currentUser;
+        const string DataFile = "C:\\Users\\muham\\RiderProjects\\horseRacingManagementSystem\\horseRacingManagementSystem\\horseRacingData.txt";
 
         static void Main(string[] args)
         {
+            LoadDataFromFile();
             while (true)
             {
                 Console.WriteLine("\nWelcome to the Horse Racing Management System");
@@ -34,6 +36,7 @@ public class Program
                         RacegoerMenu();
                         break;
                     case "4":
+                        SaveDataToFile();
                         return;
                     default:
                         Console.WriteLine("Invalid option. Please try again.");
@@ -244,16 +247,32 @@ public class Program
     {
         Console.Write("Enter horse name: ");
         string name = Console.ReadLine();
-        Console.Write("Enter horse date of birth (yyyy-mm-dd): ");
-        if (DateTime.TryParse(Console.ReadLine(), out DateTime dob))
+    
+        DateTime dob;
+        bool validDate = false;
+    
+        while (!validDate)
         {
-            Horse newHorse = new Horse(name, dob);
-            _horses.Add(newHorse);
-            Console.WriteLine($"Horse registered successfully. Horse ID: {newHorse.HorseID}");
-        }
-        else
-        {
-            Console.WriteLine("Invalid date format.");
+            Console.Write("Enter horse date of birth (yyyy-mm-dd): ");
+            if (DateTime.TryParse(Console.ReadLine(), out dob))
+            {
+                try
+                {
+                    Horse newHorse = new Horse(name, dob);
+                    _horses.Add(newHorse);
+                    Console.WriteLine($"Horse registered successfully. Horse ID: {newHorse.HorseID}");
+                    validDate = true;
+                }
+                catch (ArgumentException ex)
+                {
+                    Console.WriteLine($"Error: {ex.Message}");
+                    Console.WriteLine("Please enter a date that is not in the future.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Invalid date format. Please use yyyy-mm-dd format.");
+            }
         }
     }
 
@@ -456,59 +475,237 @@ public class Program
     }
 
     static void ViewUpcomingEvents()
+{
+    if (_events.Count == 0)
     {
-        if (_events.Count == 0)
-        {
-            Console.WriteLine("No events available.");
-            return;
-        }
+        Console.WriteLine("No events available.");
+        return;
+    }
 
-        DateTime now = DateTime.Now;
-        bool hasUpcomingEvents = false;
+    DateTime now = DateTime.Now;
+    bool hasUpcomingEvents = false;
 
-        foreach (RaceEvent evt in _events)
-        {
-            if (evt.EventDate >= now)
-            {
-                Console.WriteLine(evt.GetDetails());
-                hasUpcomingEvents = true;
-            }
-        }
+    Console.WriteLine($"Current date and time: {now}"); 
+    Console.WriteLine($"Total number of events: {_events.Count}");
 
-        if (!hasUpcomingEvents)
+    foreach (RaceEvent evt in _events)
+    {
+        Console.WriteLine($"Event: {evt.Name}, Date: {evt.EventDate}, Is Upcoming: {evt.EventDate >= now}");
+        if (evt.EventDate >= now)
         {
-            Console.WriteLine("No upcoming events.");
+            Console.WriteLine(evt.GetDetails());
+            hasUpcomingEvents = true;
         }
     }
 
-    static void ViewEventDetails()
+    if (!hasUpcomingEvents)
     {
-        if (_events.Count == 0)
-        {
-            Console.WriteLine("No events available.");
-            return;
-        }
+        Console.WriteLine("No upcoming events.");
+    }
+}
 
-        Console.Write("Enter event name: ");
-        string eventName = Console.ReadLine();
-        RaceEvent selectedEvent = null;
-        foreach (RaceEvent evt in _events)
-        {
-            if (evt.Name == eventName)
-            {
-                selectedEvent = evt;
-                break;
-            }
-        }
+static void ViewEventDetails()
+{
+    if (_events.Count == 0)
+    {
+        Console.WriteLine("No events available.");
+        return;
+    }
 
-        if (selectedEvent != null)
+    DateTime now = DateTime.Now;
+    List<RaceEvent> upcomingEvents = new List<RaceEvent>();
+
+    
+    Console.WriteLine("Upcoming Race Events:");
+    int eventCounter = 1;
+    foreach (RaceEvent evt in _events)
+    {
+        if (evt.EventDate >= now)
         {
-            Console.WriteLine(selectedEvent.GetDetails());
-            Console.WriteLine(selectedEvent.GetRaceDetails());
-        }
-        else
-        {
-            Console.WriteLine("Event not found.");
+            upcomingEvents.Add(evt);
+            Console.WriteLine($"{eventCounter}. {evt.Name} - {evt.EventDate.ToShortDateString()} at {evt.Location}");
+            eventCounter++;
         }
     }
+
+    if (upcomingEvents.Count == 0)
+    {
+        Console.WriteLine("No upcoming events.");
+        return;
+    }
+
+    
+    Console.Write("Enter the number of the event you want to view: ");
+    if (int.TryParse(Console.ReadLine(), out int selectedEventNumber) && 
+        selectedEventNumber > 0 && selectedEventNumber <= upcomingEvents.Count)
+    {
+        RaceEvent selectedEvent = upcomingEvents[selectedEventNumber - 1];
+        
+        Console.WriteLine("\nEvent Details:");
+        Console.WriteLine(selectedEvent.GetDetails());
+        
+        Console.WriteLine("\nRaces and Participants:");
+        foreach (Race race in selectedEvent.Races)
+        {
+            Console.WriteLine($"\n{race.Name} - Start Time: {race.StartTime}");
+            Console.WriteLine("Horses:");
+            if (race.Participants.Count == 0)
+            {
+                Console.WriteLine("No horses entered yet.");
+            }
+            else
+            {
+                foreach (Horse horse in race.Participants)
+                {
+                    Console.WriteLine($" - {horse.Name} (ID: {horse.HorseID})");
+                }
+            }
+        }
+    }
+    else
+    {
+        Console.WriteLine("Invalid selection.");
+    }
+}
+    
+    static void SaveDataToFile()
+    {
+        using (StreamWriter writer = new StreamWriter(DataFile))
+        {
+            foreach (RaceEvent evt in _events)
+            {
+                writer.WriteLine($"EVENT,{evt.Name},{evt.EventDate},{evt.Location}");
+                foreach (Race race in evt.Races)
+                {
+                    writer.WriteLine($"RACE,{evt.Location},{race.Name},{race.StartTime}");
+                }
+            }
+
+            foreach (Horse horse in _horses)
+            {
+                writer.WriteLine($"HORSE,{horse.Name},{horse.DateOfBirth}");
+            }
+
+            foreach (RaceEvent evt in _events)
+            {
+                foreach (Race race in evt.Races)
+                {
+                    foreach (Horse horse in race.Participants)
+                    {
+                        writer.WriteLine($"PARTICIPANT,{evt.Location},{race.Name},{horse.HorseID}");
+                    }
+                }
+            }
+        }
+        Console.WriteLine("Data saved successfully.");
+    }
+
+    static void LoadDataFromFile()
+{
+    if (!File.Exists(DataFile))
+    {
+        Console.WriteLine("No saved data found.");
+        return;
+    }
+
+    _events.Clear();
+    _horses.Clear();
+
+    using (StreamReader reader = new StreamReader(DataFile))
+    {
+        string line;
+        while ((line = reader.ReadLine()) != null)
+        {
+            string[] parts = line.Split(',');
+            if (parts.Length < 2) continue;
+
+            switch (parts[0])
+            {
+                case "EVENT":
+                    if (parts.Length == 4)
+                    {
+                        RaceEvent newEvent = new RaceEvent(parts[1], DateTime.Parse(parts[2]), parts[3]);
+                        _events.Add(newEvent);
+                        Console.WriteLine($"Loaded event: {newEvent.Name}");
+                    }
+                    break;
+                case "RACE":
+                    if (parts.Length == 4)
+                    {
+                        RaceEvent evt = null;
+                        foreach (RaceEvent e in _events)
+                        {
+                            if (e.Location == parts[1])
+                            {
+                                evt = e;
+                                break;
+                            }
+                        }
+                        if (evt != null)
+                        {
+                            Race newRace = new Race(parts[2], DateTime.Parse(parts[3]));
+                            evt.AddRace(newRace);
+                            Console.WriteLine($"Added race: {newRace.Name} to event: {evt.Name}");
+                        }
+                    }
+                    break;
+                case "HORSE":
+                    if (parts.Length == 3)  
+                    {
+                        Horse newHorse = new Horse(parts[1], DateTime.Parse(parts[2]));
+                        _horses.Add(newHorse);
+                        Console.WriteLine($"Loaded horse: {newHorse.Name}, ID: {newHorse.HorseID}");
+                    }
+                    break;
+                case "PARTICIPANT":
+                    if (parts.Length == 4)
+                    {
+                        int participantHorseId;
+                        if (int.TryParse(parts[3], out participantHorseId))
+                        {
+                            RaceEvent evt = null;
+                            foreach (RaceEvent e in _events)
+                            {
+                                if (e.Location == parts[1]) 
+                                {
+                                    evt = e;
+                                    break;
+                                }
+                            }
+                            if (evt != null)
+                            {
+                                Race race = null;
+                                foreach (Race r in evt.Races)
+                                {
+                                    if (r.Name == parts[2])
+                                    {
+                                        race = r;
+                                        break;
+                                    }
+                                }
+                                if (race != null)
+                                {
+                                    Horse horse = null;
+                                    foreach (Horse h in _horses)
+                                    {
+                                        if (h.HorseID == participantHorseId)
+                                        {
+                                            horse = h;
+                                            break;
+                                        }
+                                    }
+                                    if (horse != null)
+                                    {
+                                        race.AddHorse(horse);
+                                        Console.WriteLine($"Added horse: {horse.Name} to race: {race.Name}");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    break;
+            }
+        }
+    }
+}
 }

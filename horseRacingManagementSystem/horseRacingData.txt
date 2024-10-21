@@ -1,0 +1,18 @@
+EVENT,BIg Races,15/11/2024 00:00:00,Dundalk Racecourse
+RACE,Dundalk Racecourse,race1,15/11/2024 10:00:00
+RACE,Dundalk Racecourse,race2,15/11/2024 14:00:00
+RACE,Dundalk Racecourse,race3,15/11/2024 18:00:00
+EVENT,event2,22/10/2024 00:00:00,dundalk
+RACE,dundalk,race6,22/10/2024 05:00:00
+HORSE,horse1,15/03/2020 00:00:00
+HORSE,horse2,22/07/2019 00:00:00
+HORSE,horse3,10/01/2021 00:00:00
+HORSE,horse4,05/11/2020 00:00:00
+HORSE,horse12,01/01/1999 00:00:00
+HORSE,horsetest,20/01/1999 00:00:00
+PARTICIPANT,Dundalk Racecourse,race1,0
+PARTICIPANT,Dundalk Racecourse,race1,1
+PARTICIPANT,Dundalk Racecourse,race2,2
+PARTICIPANT,Dundalk Racecourse,race3,3
+PARTICIPANT,dundalk,race6,4
+PARTICIPANT,dundalk,race6,5
